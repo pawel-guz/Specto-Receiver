@@ -8,8 +8,6 @@ Basic functionality - connecting with PC over SerialPort will work with every Ar
 
 If you look for simple solution see: [simple circuit instructions](https://github.com/pawel-guz/Specto/blob/master/readme.md#example-circuit).
 
-![alt NodeMCU circuit for Specto](Board/schematics.png)
-
 ## To do:
 ```
 - Implement buttons handlers (network config reset & device restart)
