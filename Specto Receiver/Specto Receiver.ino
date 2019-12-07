@@ -85,6 +85,5 @@ void setup()
 void loop() 
 {
 	serialMessenger.listen();
-	udpMessenger.listen();  
-	delay(5);
+	udpMessenger.listen(); 
 }

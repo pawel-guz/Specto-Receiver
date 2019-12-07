@@ -9,8 +9,8 @@ public:
 	static void initDiodes();
 	enum Diode
 	{
-		RED = 4,
-		GREEN = 5,
+		RED = 5,
+		GREEN = 4,
 		BLUE = 0
 	};
 

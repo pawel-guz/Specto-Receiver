@@ -40,7 +40,7 @@ void RGBColorController::setColor(const int* r, const int* g, const int* b)
 
 void RGBColorController::setLed(Diode color, const int* value)
 {
-	analogWrite(color, (255 - *value) * 4);
+	analogWrite(color, *value * 4);
 }
 
 int RGBColorController::hex2dec(const char* c)

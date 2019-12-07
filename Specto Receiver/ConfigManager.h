@@ -6,7 +6,7 @@ private:
 	char *ssid;
 	char *pass;
 	ConfigManager();
-	static const int RESET_BUTTON = 13;
+	static const int RESET_BUTTON = 2;
 	static const int RESET_PRESS_MS = 5000;
 	int pressStartTime = 0;
 public:
