@@ -1,5 +1,4 @@
-#include "SerialMessengerService.h"
-#include "RGBColorController.h"
+#include "SerialMessengerService.h" 
 
 SerialMessengerService::SerialMessengerService()
 {

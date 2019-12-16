@@ -1,5 +1,10 @@
-#include "UDPMessengerService.h"
-#include <sstream>
+#pragma once
+#include "UDPMessengerService.h" 
+#include "WiFiConnectionManager.h"
+#include "RGBColorController.h"
+#include <sstream> 
+#include <ArduinoJson.h>
+
 UDPMessengerService::UDPMessengerService(uint16_t port)
 {
 	udp.begin(port);
@@ -16,7 +21,7 @@ int UDPMessengerService::listen()
 		if (len > 0)
 			incomingPacket[len] = 0;
 
-		Serial.write(millis() - last);
+		//Serial.write(millis() - last);
 		//if (millis() - lastPacketArrivalTime > MIN_PACKET_INTERVAL_MS)
 		//{
 			processMessage(udp.remoteIP(), udp.remotePort(), incomingPacket);
@@ -46,6 +51,7 @@ void UDPMessengerService::processMessage(IPAddress senderIP, uint16_t senderPort
 	JsonObject &reply = jsonBuffer.createObject();
 	char replyMessage[MAX_PACKET_SIZE] = "";
 	bool sendReply = true;
+	bool resetWiFi = false;
 
 	if (!strcmp(cmd, "getDeviceInfo"))
 	{
@@ -54,7 +60,20 @@ void UDPMessengerService::processMessage(IPAddress senderIP, uint16_t senderPort
 
 		getDeviceInfo(result);
 		reply["type"] = "deviceInfo";
-		reply["result"] = result;
+		reply["result"] = result; 
+	}
+	else if (!strcmp(cmd, "setName"))
+	{
+		if (params.containsKey("name"))
+		{
+			const char *name = params.get<const char*>("name");
+			int len = strlen(name);
+			if (len >= 1 && len <= 64)
+			{
+				configManager.setName(name);
+				configManager.save();
+			}
+		}
 	}
 	else if (!strcmp(cmd, "fetchNetworks"))
 	{
@@ -87,7 +106,8 @@ void UDPMessengerService::processMessage(IPAddress senderIP, uint16_t senderPort
 		StaticJsonBuffer<200> jsonBuffer;
 		JsonObject &result = jsonBuffer.createObject(); 
 
-		result["connected"] = configManager.save() ? true : false;
+		resetWiFi = configManager.save();
+		result["connected"] = resetWiFi;
 		reply["type"] = "setWiFiFeedback";
 		reply["result"] = result;
 
@@ -121,7 +141,10 @@ void UDPMessengerService::processMessage(IPAddress senderIP, uint16_t senderPort
 	}
 
 	reply.printTo(replyMessage, MAX_PACKET_SIZE);
-	sendPacket(senderIP, senderPort, replyMessage);
+	sendPacket(senderIP, senderPort, replyMessage); 
+
+	if (resetWiFi)
+		WiFiConnectionManager::reconnect(configManager, false);
 }
 
 void UDPMessengerService::sendPacket(IPAddress ip, uint16_t port, const char *content)
@@ -133,7 +156,16 @@ void UDPMessengerService::sendPacket(IPAddress ip, uint16_t port, const char *co
 
 void UDPMessengerService::getDeviceInfo(JsonObject &result)
 {
+	char name[64];
+	char wifiName[64] = "";
+	configManager.getName(name);
+	configManager.getSSID(wifiName);
+
+	bool isConnected = WiFiConnectionManager::isInNetwork();
+
+	result["name"] = name;
 	result["serialNumber"] = ESP.getChipId();
+	result["network"] = wifiName;
 }
 
 void UDPMessengerService::sendNetworksList(IPAddress ip, uint16_t port)
@@ -158,6 +190,8 @@ void UDPMessengerService::sendNetworksList(IPAddress ip, uint16_t port)
 		network["SSID"] = WiFi.SSID(i);
 		network["signalStrenght"] = signalStrenght;
 		network["isProtected"] = (bool)WiFi.encryptionType(i) != ENC_TYPE_NONE;
+		network["id"] = i;
+		network["networksCount"] = networksCount;
 
 		result["type"] = "networkData";
 		result["result"] = network;

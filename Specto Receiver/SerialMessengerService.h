@@ -1,4 +1,5 @@
 #pragma once
+#include "RGBColorController.h"
 #include "FS.h"
 
 class SerialMessengerService
