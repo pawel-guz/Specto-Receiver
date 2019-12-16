@@ -1,6 +1,5 @@
 # Specto-Receiver
 Source code for a DIY micro-board receiver for [Specto Music Visualizer](https://github.com/pawel-guz/Specto/blob/master/readme.md#specto-music--visualizer).
-#### Note: This version hasn't been tested with the latest version of Specto.
 
 ## Board and circuit
 This code is compatible with NodeMCU v1.0 boards. It should also work with other boards based on ESP8266 WiFI modules. 
